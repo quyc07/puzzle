@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta name="description" content="三角形、正方形和圆形迷宫生成器" />
     <title>形状迷宫生成器</title>
-    <link rel="stylesheet" href="./styles.css?v=4" />
+    <link rel="stylesheet" href="./styles.css?v=6" />
   </head>
   <body>
     <main class="app-shell">
@@ -102,17 +102,24 @@
                 <input type="radio" name="gameMode" value="treasure" />
                 <span><strong>取宝逃生</strong><small>先取中心宝物，再逃到出口</small></span>
               </label>
+              <label>
+                <input type="radio" name="gameMode" value="timeAttack" />
+                <span><strong>计时挑战</strong><small>倒计时内到达目标，撞墙扣时</small></span>
+              </label>
             </div>
             <div class="play-state" aria-live="polite">
               <strong id="play-status">准备闯关</strong>
               <small id="play-hint">从入口出发，找到橙色目标</small>
             </div>
             <div class="play-metrics" aria-label="闯关数据">
-              <span><small>时间</small><strong id="play-time">00:00</strong></span>
+              <span><small id="time-label">时间</small><strong id="play-time">00:00</strong></span>
               <span><small>步数</small><strong id="play-moves">0</strong></span>
               <span><small>撞墙</small><strong id="play-collisions">0</strong></span>
             </div>
-            <button id="start-play" type="button" class="primary">开始闯关</button>
+            <div class="play-actions">
+              <button id="start-play" type="button" class="primary">开始闯关</button>
+              <button id="stop-play" type="button" class="danger" disabled>终止游戏</button>
+            </div>
           </div>
           <div id="maze-preview" class="maze-preview"></div>
           <div class="preview-footer">
@@ -132,6 +139,6 @@
       </section>
     </main>
 
-    <script type="module" src="./src/app.js?v=10"></script>
+    <script type="module" src="./src/app.js?v=12"></script>
   </body>
 </html>

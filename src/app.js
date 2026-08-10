@@ -1,4 +1,5 @@
-import { attemptMove, findPath, generateMaze, mazeToSvg, validateMaze } from "./maze.js?v=10";
+import { COLLISION_PENALTY_MS, remainingTime, timeLimitForMaze } from "./game.js?v=2";
+import { attemptMove, findPath, generateMaze, mazeToSvg, validateMaze } from "./maze.js?v=11";
 
 const shapeNames = {
   triangle: "三角形",
@@ -20,6 +21,7 @@ const goalModeNames = {
 const gameModeNames = {
   classic: "经典闯关",
   treasure: "取宝逃生",
+  timeAttack: "计时挑战",
 };
 
 const form = document.querySelector("#maze-form");
@@ -29,9 +31,11 @@ const solutionInput = document.querySelector("#show-solution");
 const downloadButton = document.querySelector("#download-svg");
 const stats = document.querySelector("#maze-stats");
 const playButton = document.querySelector("#start-play");
+const stopButton = document.querySelector("#stop-play");
 const playStatus = document.querySelector("#play-status");
 const playHint = document.querySelector("#play-hint");
 const timeDisplay = document.querySelector("#play-time");
+const timeLabel = document.querySelector("#time-label");
 const moveDisplay = document.querySelector("#play-moves");
 const collisionDisplay = document.querySelector("#play-collisions");
 const directionButtons = [...document.querySelectorAll("[data-direction]")];
@@ -67,17 +71,28 @@ function elapsedTime() {
   if (!playState?.startedAt) {
     return 0;
   }
-  return playState.completedAt
-    ? playState.completedAt - playState.startedAt
-    : Date.now() - playState.startedAt;
+  const endTime = playState.completedAt ?? playState.failedAt ?? playState.abortedAt ?? Date.now();
+  return endTime - playState.startedAt;
 }
 
 function updatePlayUI() {
   const isActive = Boolean(playState?.active);
   const isCompleted = Boolean(playState?.completedAt);
+  const isFailed = Boolean(playState?.failedAt);
+  const isAborted = Boolean(playState?.abortedAt);
   const isTreasureMode = playState?.gameMode === "treasure";
+  const isTimeAttack = playState?.gameMode === "timeAttack";
 
-  if (isTreasureMode) {
+  if (isAborted) {
+    playStatus.textContent = "游戏已终止";
+    playHint.textContent = `已保留 ${playState.moves} 步记录，可以重新开始或切换模式`;
+  } else if (isTimeAttack) {
+    playStatus.textContent = isFailed ? "时间到！" : isCompleted ? "限时通关！" : isActive ? "争分夺秒" : "准备计时挑战";
+    playHint.textContent = isFailed
+      ? `还差一点，再试一次吧`
+      : isCompleted ? `剩余 ${formatTime(remainingTime(playState))}，共移动 ${playState.moves} 步`
+        : isActive ? `尽快到达目标，撞墙扣除 ${COLLISION_PENALTY_MS / 1000} 秒` : "在倒计时结束前找到目标";
+  } else if (isTreasureMode) {
     playStatus.textContent = isCompleted
       ? "成功带宝物逃出！"
       : playState.treasureCollected ? "宝物已到手" : isActive ? "寻找中心宝物" : "准备取宝逃生";
@@ -92,10 +107,15 @@ function updatePlayUI() {
       ? `你用了 ${playState.moves} 步到达目标`
       : isActive ? "使用方向键、WASD 或下方按钮移动" : "从入口出发，找到橙色目标";
   }
-  timeDisplay.textContent = formatTime(elapsedTime());
+  timeLabel.textContent = isTimeAttack ? "剩余" : "时间";
+  timeDisplay.textContent = formatTime(isTimeAttack ? remainingTime(playState) : elapsedTime());
   moveDisplay.textContent = String(playState?.moves ?? 0);
   collisionDisplay.textContent = String(playState?.collisions ?? 0);
-  playButton.textContent = isCompleted ? "再玩一次" : isActive ? "重新开始" : "开始闯关";
+  playButton.textContent = isCompleted || isFailed ? "再玩一次" : isActive ? "重新开始" : "开始闯关";
+  if (isAborted) {
+    playButton.textContent = "重新开始";
+  }
+  stopButton.disabled = !isActive;
   directionButtons.forEach((button) => {
     button.disabled = !isActive;
   });
@@ -116,12 +136,16 @@ function resetPlay() {
   playState = {
     active: false,
     completedAt: null,
+    failedAt: null,
+    abortedAt: null,
     startedAt: null,
     moves: 0,
     collisions: 0,
     path: [],
     gameMode: selectedGameMode(),
     treasureCollected: false,
+    penaltyMs: 0,
+    timeLimitMs: timeLimitForMaze(maze),
   };
 }
 
@@ -171,7 +195,28 @@ function startPlay() {
   playState.active = true;
   playState.startedAt = Date.now();
   playState.path = [maze.entrance];
-  timerId = window.setInterval(updatePlayUI, 250);
+  timerId = window.setInterval(tickPlay, 100);
+  render();
+}
+
+function tickPlay() {
+  if (playState.gameMode === "timeAttack" && playState.active && remainingTime(playState) <= 0) {
+    playState.active = false;
+    playState.failedAt = Date.now();
+    stopTimer();
+    render();
+    return;
+  }
+  updatePlayUI();
+}
+
+function stopPlay() {
+  if (!playState.active) {
+    return;
+  }
+  playState.active = false;
+  playState.abortedAt = Date.now();
+  stopTimer();
   render();
 }
 
@@ -184,7 +229,10 @@ function movePlayer(direction) {
   const result = attemptMove(maze, current, direction);
   if (!result.moved) {
     playState.collisions += 1;
-    updatePlayUI();
+    if (playState.gameMode === "timeAttack") {
+      playState.penaltyMs += COLLISION_PENALTY_MS;
+    }
+    tickPlay();
     return;
   }
 
@@ -193,7 +241,7 @@ function movePlayer(direction) {
   if (playState.gameMode === "treasure" && !playState.treasureCollected && result.cell === maze.center) {
     playState.treasureCollected = true;
   }
-  const canFinish = playState.gameMode === "classic" || playState.treasureCollected;
+  const canFinish = playState.gameMode !== "treasure" || playState.treasureCollected;
   if (result.cell === maze.target && canFinish) {
     playState.active = false;
     playState.completedAt = Date.now();
@@ -218,6 +266,7 @@ form.addEventListener("change", (event) => {
 
 document.querySelector("#reuse-seed").addEventListener("click", generate);
 playButton.addEventListener("click", startPlay);
+stopButton.addEventListener("click", stopPlay);
 
 gameModeInputs.forEach((input) => {
   input.addEventListener("change", () => {

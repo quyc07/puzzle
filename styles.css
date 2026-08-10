@@ -10,6 +10,10 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   min-width: 320px;
@@ -297,6 +301,12 @@ button.secondary {
   color: #172326;
 }
 
+button.danger {
+  border-color: #c7684b;
+  background: transparent;
+  color: #a33f26;
+}
+
 button:hover:not(:disabled) {
   filter: brightness(1.08);
 }
@@ -347,7 +357,7 @@ button:disabled {
 .game-mode-picker {
   display: grid;
   grid-column: 1 / -1;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
 }
 
@@ -393,6 +403,12 @@ button:disabled {
 .play-state {
   display: grid;
   gap: 3px;
+}
+
+.play-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
 
 .play-state small {
@@ -527,7 +543,7 @@ button:disabled {
     grid-template-columns: 1fr auto;
   }
 
-  .play-toolbar > button {
+  .play-actions {
     grid-column: 1 / -1;
   }
 }
@@ -575,7 +591,7 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 
-  .play-toolbar > button {
+  .play-actions {
     grid-column: auto;
   }
 
