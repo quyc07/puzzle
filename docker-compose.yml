@@ -1,0 +1,6 @@
+services:
+  puzzle:
+    image: puzzle:latest
+    container_name: puzzle
+    ports:
+      - "80:80"
