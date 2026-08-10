@@ -244,6 +244,7 @@ export function mazeToSvg(maze, { showSolution = false, cellSize = 24 } = {}) {
   const padding = cellSize * 1.6;
   const extent = maze.size * cellSize;
   const width = extent + padding * 2;
+  const height = width + cellSize * 1.15;
   const lineWidth = Math.max(2, cellSize * 0.11);
   const segments = new Set();
 
@@ -298,13 +299,27 @@ export function mazeToSvg(maze, { showSolution = false, cellSize = 24 } = {}) {
       : []),
   ].join(" ");
   const targetLabel = maze.goalMode === "center" ? "终点" : "出口";
+  const shapeLabels = { triangle: "三角形", square: "正方形", circle: "圆形" };
+  const goalModeLabels = { center: "中心终点", through: "贯穿出口" };
+  const watermark = `随机种子 ${maze.seed} · ${shapeLabels[maze.shape]} · ${maze.size}×${maze.size} · ${goalModeLabels[maze.goalMode]} · V1`;
+  const reproduction = JSON.stringify({
+    version: 1,
+    seed: maze.seed,
+    shape: maze.shape,
+    size: maze.size,
+    goalMode: maze.goalMode,
+  });
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${width}" role="img" aria-label="${maze.shape} maze">
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${maze.shape} maze" data-maze-version="1" data-maze-seed="${maze.seed}" data-maze-shape="${maze.shape}" data-maze-size="${maze.size}" data-maze-goal-mode="${maze.goalMode}">
+  <metadata id="maze-reproduction">${reproduction}</metadata>
   <rect width="100%" height="100%" fill="#fffdf8" />
+  <text x="${width / 2}" y="${padding + extent / 2}" text-anchor="middle" dominant-baseline="middle" transform="rotate(-28 ${width / 2} ${padding + extent / 2})" font-family="sans-serif" font-size="${cellSize * 1.25}" font-weight="700" letter-spacing="0.08em" fill="#657172" opacity="0.22">SEED · ${maze.seed}</text>
   ${showSolution ? `<polyline points="${solutionPoints}" fill="none" stroke="#ef8354" stroke-width="${cellSize * 0.28}" stroke-linecap="round" stroke-linejoin="round" opacity="0.8" />` : ""}
   <g fill="none" stroke="#172326" stroke-width="${lineWidth}" stroke-linecap="square">${wallLines}</g>
   <circle cx="${target.x}" cy="${target.y}" r="${cellSize * 0.3}" fill="#ef8354" />
   <circle cx="${entrance.x}" cy="${entrance.y}" r="${cellSize * 0.18}" fill="#2a7f78" />
   <text x="${target.x}" y="${target.y - cellSize * 0.72}" text-anchor="middle" font-family="sans-serif" font-size="${cellSize * 0.48}" font-weight="700" fill="#b64d2e">${targetLabel}</text>
+  <line x1="${padding}" y1="${width + cellSize * 0.12}" x2="${width - padding}" y2="${width + cellSize * 0.12}" stroke="#657172" stroke-width="1" opacity="0.28" />
+  <text x="${width / 2}" y="${width + cellSize * 0.72}" text-anchor="middle" font-family="sans-serif" font-size="${cellSize * 0.42}" letter-spacing="0.04em" fill="#657172" opacity="0.78">${watermark}</text>
 </svg>`;
 }

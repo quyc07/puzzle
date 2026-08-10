@@ -53,6 +53,21 @@ test("SVG labels the selected goal mode", () => {
   assert.match(mazeToSvg(throughMaze), />出口<\/text>/);
 });
 
+test("SVG embeds visible and machine-readable reproduction data", () => {
+  const maze = generateMaze({ shape: "triangle", size: 23, seed: 123456, goalMode: "center" });
+  const svg = mazeToSvg(maze);
+
+  assert.match(svg, /随机种子 123456 · 三角形 · 23×23 · 中心终点 · V1/);
+  assert.match(svg, />SEED · 123456<\/text>/);
+  assert.doesNotMatch(svg, /id="maze-watermark"/);
+  assert.match(svg, /width="628\.8" height="656\.4" viewBox="0 0 628\.8 656\.4"/);
+  assert.match(svg, /data-maze-seed="123456"/);
+  assert.match(svg, /data-maze-shape="triangle"/);
+  assert.match(svg, /data-maze-size="23"/);
+  assert.match(svg, /data-maze-goal-mode="center"/);
+  assert.match(svg, /<metadata id="maze-reproduction">\{"version":1,"seed":123456/);
+});
+
 test("invalid size is rejected", () => {
   assert.throws(() => generateMaze({ size: 5 }), /between 7 and 61/);
   assert.throws(() => generateMaze({ goalMode: "unknown" }), /center or through/);

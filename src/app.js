@@ -1,4 +1,4 @@
-import { generateMaze, mazeToSvg, validateMaze } from "./maze.js?v=2";
+import { generateMaze, mazeToSvg, validateMaze } from "./maze.js?v=7";
 
 const shapeNames = {
   triangle: "三角形",
@@ -76,7 +76,7 @@ downloadButton.addEventListener("click", () => {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `maze-${maze.shape}-${maze.seed}.svg`;
+  link.download = `maze-${maze.shape}-${maze.seed}-watermarked.svg`;
   document.body.append(link);
   link.click();
   link.remove();
