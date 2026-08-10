@@ -345,17 +345,33 @@ export function mazeToSvg(maze, {
     size: maze.size,
     goalMode: maze.goalMode,
   });
+  const fogOverlap = lineWidth / 2;
   const fogCells = fogVisibleKeys
     ? [...maze.cells.values()]
       .filter((cell) => !fogVisibleKeys.has(cell.key))
       .map((cell) => (
-        `<rect class="fog-cell" x="${padding + cell.col * cellSize}" y="${padding + cell.row * cellSize}" width="${cellSize}" height="${cellSize}" />`
+        `<rect class="fog-cell" x="${padding + cell.col * cellSize - fogOverlap}" y="${padding + cell.row * cellSize - fogOverlap}" width="${cellSize + fogOverlap * 2}" height="${cellSize + fogOverlap * 2}" fill="url(#fog-glass)" />`
       ))
       .join("")
     : "";
+  const fogDefinitions = fogVisibleKeys ? `<defs>
+    <linearGradient id="fog-glass" gradientUnits="userSpaceOnUse" x1="${padding}" y1="${padding}" x2="${padding + extent}" y2="${padding + extent}">
+      <stop offset="0" stop-color="#edf5f3" stop-opacity="1" />
+      <stop offset="0.48" stop-color="#bdcfcc" stop-opacity="1" />
+      <stop offset="1" stop-color="#8fa8a4" stop-opacity="1" />
+    </linearGradient>
+    <filter id="fog-frost" x="-4%" y="-4%" width="108%" height="108%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="3" seed="${maze.seed % 97}" result="noise" />
+      <feColorMatrix in="noise" type="matrix" values="1 0 0 0 0.15 0 1 0 0 0.2 0 0 1 0 0.19 0 0 0 0.22 0" result="frost" />
+      <feComposite in="frost" in2="SourceGraphic" operator="in" result="clippedFrost" />
+      <feGaussianBlur in="clippedFrost" stdDeviation="0.35" result="softFrost" />
+      <feBlend in="SourceGraphic" in2="softFrost" mode="screen" />
+    </filter>
+  </defs>` : "";
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${maze.shape} maze" data-maze-version="1" data-maze-seed="${maze.seed}" data-maze-shape="${maze.shape}" data-maze-size="${maze.size}" data-maze-goal-mode="${maze.goalMode}">
   <metadata id="maze-reproduction">${reproduction}</metadata>
+  ${fogDefinitions}
   <rect width="100%" height="100%" fill="#fffdf8" />
   <text x="${width / 2}" y="${padding + extent / 2}" text-anchor="middle" dominant-baseline="middle" transform="rotate(-28 ${width / 2} ${padding + extent / 2})" font-family="sans-serif" font-size="${cellSize * 1.25}" font-weight="700" letter-spacing="0.08em" fill="#657172" opacity="0.22">SEED · ${maze.seed}</text>
   ${showSolution ? `<polyline id="maze-solution" points="${solutionPoints}" fill="none" stroke="#ef8354" stroke-width="${cellSize * 0.28}" stroke-linecap="round" stroke-linejoin="round" opacity="0.8" />` : ""}
@@ -365,7 +381,7 @@ export function mazeToSvg(maze, {
   <circle cx="${entrance.x}" cy="${entrance.y}" r="${cellSize * 0.18}" fill="#2a7f78" />
   ${treasure && !treasureCollected ? `<circle id="maze-treasure" cx="${treasure.x}" cy="${treasure.y}" r="${cellSize * 0.38}" fill="#f4c95d" stroke="#9a6b12" stroke-width="${cellSize * 0.1}" /><text x="${treasure.x}" y="${treasure.y + cellSize * 0.18}" text-anchor="middle" font-family="sans-serif" font-size="${cellSize * 0.55}" font-weight="700" fill="#704b09">★</text>` : ""}
   ${targetIsVisible ? `<text x="${target.x}" y="${target.y - cellSize * 0.72}" text-anchor="middle" font-family="sans-serif" font-size="${cellSize * 0.48}" font-weight="700" fill="#b64d2e">${targetLabel}</text>` : ""}
-  ${fogVisibleKeys ? `<g id="fog-overlay" fill="#172326">${fogCells}</g>` : ""}
+  ${fogVisibleKeys ? `<g id="fog-overlay" filter="url(#fog-frost)">${fogCells}</g>` : ""}
   ${player ? `<circle id="maze-player" cx="${player.x}" cy="${player.y}" r="${cellSize * 0.32}" fill="#fffdf8" stroke="#11665f" stroke-width="${cellSize * 0.15}" />` : ""}
   <line x1="${padding}" y1="${width + cellSize * 0.12}" x2="${width - padding}" y2="${width + cellSize * 0.12}" stroke="#657172" stroke-width="1" opacity="0.28" />
   <text x="${width / 2}" y="${width + cellSize * 0.72}" text-anchor="middle" font-family="sans-serif" font-size="${cellSize * 0.42}" letter-spacing="0.04em" fill="#657172" opacity="0.78">${watermark}</text>

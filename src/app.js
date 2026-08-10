@@ -1,5 +1,5 @@
 import { COLLISION_PENALTY_MS, remainingTime, timeLimitForMaze, visibleCellsForFog } from "./game.js?v=3";
-import { attemptMove, findPath, generateMaze, mazeToSvg, validateMaze } from "./maze.js?v=12";
+import { attemptMove, findPath, generateMaze, mazeToSvg, validateMaze } from "./maze.js?v=14";
 
 const shapeNames = {
   triangle: "三角形",

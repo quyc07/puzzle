@@ -80,8 +80,15 @@ test("SVG fog hides unexplored cells but leaves the player visible", () => {
   const svg = mazeToSvg(maze, { playerPath: [maze.entrance], fogVisibleKeys: visible });
   const revealedSvg = mazeToSvg(maze, { fogVisibleKeys: new Set([maze.target.key]) });
   const fogCellCount = svg.match(/class="fog-cell"/g)?.length ?? 0;
+  const firstFogCell = svg.match(/class="fog-cell" x="([^"]+)" y="([^"]+)" width="([^"]+)" height="([^"]+)"/);
 
   assert.match(svg, /id="fog-overlay"/);
+  assert.match(svg, /id="fog-glass"/);
+  assert.match(svg, /id="fog-frost"/);
+  assert.match(svg, /<feTurbulence/);
+  assert.equal(svg.match(/stop-opacity="1"/g)?.length, 3);
+  assert.ok(Number(firstFogCell[1]) < 38.4);
+  assert.ok(Number(firstFogCell[3]) > 24);
   assert.equal(fogCellCount, maze.cells.size - 1);
   assert.ok(svg.indexOf('id="fog-overlay"') < svg.indexOf('id="maze-player"'));
   assert.doesNotMatch(svg, /id="maze-target"/);
