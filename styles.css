@@ -321,6 +321,7 @@ button:disabled {
   min-height: 680px;
   flex-direction: column;
   padding: 28px;
+  scroll-margin-top: 8px;
 }
 
 .preview-heading {
@@ -448,6 +449,7 @@ button:disabled {
 .maze-preview svg {
   display: block;
   width: min(100%, 640px);
+  height: auto;
   max-height: 570px;
 }
 
@@ -554,7 +556,7 @@ button:disabled {
   }
 
   .preview-panel {
-    min-height: 560px;
+    min-height: 0;
   }
 
   .play-toolbar {
@@ -607,10 +609,13 @@ button:disabled {
 
   .play-toolbar {
     grid-template-columns: 1fr;
+    gap: 10px;
+    margin-top: 12px;
+    padding: 10px;
   }
 
   .game-mode-picker {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .play-actions {
@@ -621,8 +626,39 @@ button:disabled {
     justify-content: space-between;
   }
 
+  .maze-preview {
+    flex: none;
+    padding: 4px 0;
+  }
+
+  .maze-preview svg {
+    width: min(100%, 360px);
+    width: min(100%, 42svh);
+    max-height: none;
+  }
+
+  .touch-hint {
+    margin-bottom: 6px;
+  }
+
   .preview-footer {
     align-items: center;
     flex-direction: column;
+    gap: 10px;
+  }
+
+  .direction-pad {
+    grid-template-columns: repeat(4, 40px);
+    grid-template-areas: "left up down right";
+  }
+
+  .preview-panel.is-playing .preview-heading,
+  .preview-panel.is-playing .game-mode-picker,
+  .preview-panel.is-playing .legend {
+    display: none;
+  }
+
+  .preview-panel.is-playing .play-toolbar {
+    margin-top: 0;
   }
 }

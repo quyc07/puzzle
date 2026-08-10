@@ -27,6 +27,7 @@ const gameModeNames = {
 
 const form = document.querySelector("#maze-form");
 const preview = document.querySelector("#maze-preview");
+const previewPanel = document.querySelector(".preview-panel");
 const seedInput = document.querySelector("#seed");
 const solutionInput = document.querySelector("#show-solution");
 const downloadButton = document.querySelector("#download-svg");
@@ -132,6 +133,7 @@ function updatePlayUI() {
     input.disabled = isActive;
   });
   preview.classList.toggle("is-playing", isActive);
+  previewPanel.classList.toggle("is-playing", isActive);
 }
 
 function stopTimer() {
@@ -211,6 +213,9 @@ function startPlay() {
   playState.path = [maze.entrance];
   timerId = window.setInterval(tickPlay, 100);
   render();
+  if (window.matchMedia("(max-width: 520px)").matches) {
+    window.requestAnimationFrame(() => previewPanel.scrollIntoView({ behavior: "smooth", block: "start" }));
+  }
 }
 
 function tickPlay() {
