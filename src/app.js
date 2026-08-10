@@ -46,6 +46,11 @@ const centerGoalInput = form.elements.goalMode[0];
 const throughGoalInput = form.elements.goalMode[1];
 const treasureLegend = document.querySelector("#treasure-legend");
 const fogLegend = document.querySelector("#fog-legend");
+const celebrationBanner = document.querySelector("#celebration-banner");
+const celebrationTitle = document.querySelector("#celebration-title");
+const fireworksLayer = document.querySelector("#fireworks-layer");
+
+const FIREWORK_EMOJIS = ["🎉", "🎊", "✨", "⭐", "🏆", "🧭", "🎈", "💫"];
 
 let maze;
 let timerId;
@@ -146,6 +151,8 @@ function stopTimer() {
 function resetPlay() {
   stopTimer();
   swipeStart = undefined;
+  celebrationBanner.hidden = true;
+  celebrationBanner.classList.remove("show");
   playState = {
     active: false,
     completedAt: null,
@@ -265,9 +272,91 @@ function movePlayer(direction) {
     playState.active = false;
     playState.completedAt = Date.now();
     stopTimer();
+    render();
+    celebrate();
+    return;
   }
   render();
 }
+
+function fireworksOrigin() {
+  const svg = preview.querySelector("svg");
+  if (!svg) {
+    return { x: window.innerWidth / 2, y: window.innerHeight * 0.4 };
+  }
+  const rect = svg.getBoundingClientRect();
+  const viewBoxWidth = svg.viewBox.baseVal.width;
+  const scale = rect.width / viewBoxWidth;
+  // 由 viewBox 宽度反推 mazeToSvg 的格子尺寸与内边距，避免硬编码
+  const cellSize = viewBoxWidth / (maze.size + 3.2);
+  const padding = cellSize * 1.6;
+  return {
+    x: rect.left + (padding + (maze.target.col + 0.5) * cellSize) * scale,
+    y: rect.top + (padding + (maze.target.row + 0.5) * cellSize) * scale,
+  };
+}
+
+function launchFireworks(x, y, count = 40) {
+  for (let index = 0; index < count; index += 1) {
+    const particle = document.createElement("span");
+    particle.className = "firework-particle";
+    particle.textContent = FIREWORK_EMOJIS[Math.floor(Math.random() * FIREWORK_EMOJIS.length)];
+    particle.style.left = `${x}px`;
+    particle.style.top = `${y}px`;
+    particle.style.fontSize = `${16 + Math.random() * 18}px`;
+    fireworksLayer.append(particle);
+
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 80 + Math.random() * 160;
+    const horizontal = Math.cos(angle) * speed;
+    const vertical = Math.sin(angle) * speed;
+    // 三段关键帧：先向外上方加速，再回落下落，形成抛物线
+    const animation = particle.animate(
+      [
+        { transform: "translate(-50%, -50%) scale(0.4)", opacity: 1, offset: 0 },
+        {
+          transform: `translate(calc(-50% + ${horizontal * 0.65}px), calc(-50% + ${vertical * 0.65 - 110}px)) scale(1.15)`,
+          opacity: 1,
+          offset: 0.4,
+        },
+        { transform: `translate(calc(-50% + ${horizontal}px), calc(-50% + ${vertical}px)) scale(0.9)`, opacity: 0, offset: 1 },
+      ],
+      { duration: 1400 + Math.random() * 800, easing: "cubic-bezier(0.15, 0.55, 0.4, 1)", fill: "forwards" },
+    );
+    animation.finished.then(() => particle.remove()).catch(() => particle.remove());
+  }
+}
+
+function celebrate() {
+  celebrationTitle.textContent = playStatus.textContent;
+  celebrationBanner.hidden = false;
+  celebrationBanner.classList.remove("show");
+  void celebrationBanner.offsetWidth; // 重新触发弹入动画
+  celebrationBanner.classList.add("show");
+
+  const origin = fireworksOrigin();
+  // 6 波烟花持续约 5 秒，末波随粒子最长飞行时间一同收尾
+  const waves = [
+    { dx: 0, dy: 0, count: 42, delay: 0 },
+    { dx: 40, dy: -30, count: 30, delay: 650 },
+    { dx: -50, dy: 20, count: 30, delay: 1300 },
+    { dx: 20, dy: -60, count: 26, delay: 1950 },
+    { dx: -30, dy: -10, count: 26, delay: 2600 },
+    { dx: 0, dy: -40, count: 30, delay: 3250 },
+  ];
+  waves.forEach((wave) => {
+    window.setTimeout(
+      () => launchFireworks(origin.x + wave.dx, origin.y + wave.dy, wave.count),
+      wave.delay,
+    );
+  });
+}
+
+celebrationBanner.addEventListener("animationend", (event) => {
+  if (event.animationName === "celebrate-pop") {
+    celebrationBanner.hidden = true;
+  }
+});
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();

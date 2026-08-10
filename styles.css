@@ -677,3 +677,106 @@ button:disabled {
     margin-top: 0;
   }
 }
+
+/* 通关庆祝：烟花粒子与横幅 */
+#fireworks-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.firework-particle {
+  position: absolute;
+  line-height: 1;
+  will-change: transform, opacity;
+}
+
+#celebration-banner {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 36px;
+  border: 2px solid #2a7f78;
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.96);
+  box-shadow: 0 24px 64px rgba(23, 35, 38, 0.28);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+#celebration-banner strong {
+  font-family: Georgia, "Songti SC", serif;
+  font-size: 1.7rem;
+  letter-spacing: 0.02em;
+}
+
+#celebration-banner .celebrate-emoji {
+  font-size: 2rem;
+  animation: celebrate-bounce 0.9s ease-in-out infinite;
+}
+
+#celebration-banner .celebrate-emoji:nth-of-type(2) {
+  animation-delay: 0.15s;
+}
+
+#celebration-banner.show {
+  animation: celebrate-pop 5s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+
+@media (max-width: 520px) {
+  #celebration-banner {
+    gap: 10px;
+    padding: 14px 22px;
+    max-width: calc(100vw - 32px);
+  }
+
+  #celebration-banner strong {
+    font-size: 1.2rem;
+  }
+
+  #celebration-banner .celebrate-emoji {
+    font-size: 1.5rem;
+  }
+}
+
+@keyframes celebrate-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.3);
+  }
+
+  12% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.06);
+  }
+
+  20% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  78% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.02);
+  }
+}
+
+@keyframes celebrate-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
