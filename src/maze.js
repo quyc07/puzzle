@@ -129,26 +129,50 @@ function outsideDirections(cell, cells) {
   ));
 }
 
-function chooseEntrance(goal, cells) {
-  const { distances } = distancesFrom(goal, cells);
+function chooseCenterEntrance(target, cells) {
+  const { distances } = distancesFrom(target, cells);
   const boundaryCells = [...cells.values()].filter((cell) => outsideDirections(cell, cells).length > 0);
   const entrance = boundaryCells.reduce((best, cell) => (
     !best || distances.get(cell.key) > distances.get(best.key) ? cell : best
   ), null);
+  const opening = outsideDirections(entrance, cells)[0];
 
-  const preferredOrder = ["S", "W", "E", "N"];
-  const openings = outsideDirections(entrance, cells);
-  const opening = preferredOrder
-    .map((name) => openings.find((direction) => direction.name === name))
-    .find(Boolean) ?? openings[0];
   entrance.walls[opening.name] = false;
   return { entrance, entranceDirection: opening.name };
 }
 
-function solve(entrance, goal, cells) {
+function chooseEndpoints(cells) {
+  const allCells = [...cells.values()];
+  const topRow = Math.min(...allCells.map((cell) => cell.row));
+  const bottomRow = Math.max(...allCells.map((cell) => cell.row));
+  const exits = allCells.filter((cell) => cell.row === topRow);
+  const entrances = allCells.filter((cell) => cell.row === bottomRow);
+  let bestPair;
+
+  for (const entrance of entrances) {
+    const { distances } = distancesFrom(entrance, cells);
+    for (const exit of exits) {
+      const distance = distances.get(exit.key);
+      if (!bestPair || distance > bestPair.distance) {
+        bestPair = { entrance, exit, distance };
+      }
+    }
+  }
+
+  bestPair.entrance.walls.S = false;
+  bestPair.exit.walls.N = false;
+  return {
+    entrance: bestPair.entrance,
+    entranceDirection: "S",
+    exit: bestPair.exit,
+    exitDirection: "N",
+  };
+}
+
+function solve(entrance, target, cells) {
   const { previous } = distancesFrom(entrance, cells);
   const path = [];
-  let currentKey = goal.key;
+  let currentKey = target.key;
 
   while (currentKey) {
     path.push(cells.get(currentKey));
@@ -161,26 +185,38 @@ function solve(entrance, goal, cells) {
   throw new Error("Maze has no solution");
 }
 
-export function generateMaze({ shape = "circle", size = 21, seed = Date.now() } = {}) {
+export function generateMaze({
+  shape = "circle",
+  size = 21,
+  seed = Date.now(),
+  goalMode = "through",
+} = {}) {
   if (!Number.isInteger(size) || size < 7 || size > 61) {
     throw new Error("size must be an integer between 7 and 61");
+  }
+  if (!["center", "through"].includes(goalMode)) {
+    throw new Error("goalMode must be center or through");
   }
 
   const normalizedSeed = Number(seed) >>> 0;
   const cells = createCells(shape, size);
-  const goal = closestToCenter(cells, size);
-  carveMaze(cells, goal, mulberry32(normalizedSeed));
-  const { entrance, entranceDirection } = chooseEntrance(goal, cells);
-  const solution = solve(entrance, goal, cells);
+  const start = goalMode === "center" ? closestToCenter(cells, size) : cells.values().next().value;
+  carveMaze(cells, start, mulberry32(normalizedSeed));
+  const endpoints = goalMode === "center"
+    ? { ...chooseCenterEntrance(start, cells), target: start, targetDirection: null }
+    : (() => {
+      const { entrance, entranceDirection, exit, exitDirection } = chooseEndpoints(cells);
+      return { entrance, entranceDirection, target: exit, targetDirection: exitDirection };
+    })();
+  const solution = solve(endpoints.entrance, endpoints.target, cells);
 
   return {
     shape,
     size,
     seed: normalizedSeed,
+    goalMode,
     cells,
-    entrance,
-    entranceDirection,
-    goal,
+    ...endpoints,
     solution,
   };
 }
@@ -196,6 +232,10 @@ export function validateMaze(maze) {
   return {
     connected: distances.size === maze.cells.size,
     perfect: passageCount === maze.cells.size - 1,
+    boundaryOpenings: [...maze.cells.values()].reduce((count, cell) => (
+      count + outsideDirections(cell, maze.cells)
+        .filter((direction) => !cell.walls[direction.name]).length
+    ), 0),
     solutionLength: maze.solution.length,
   };
 }
@@ -233,21 +273,38 @@ export function mazeToSvg(maze, { showSolution = false, cellSize = 24 } = {}) {
     x: padding + (cell.col + 0.5) * cellSize,
     y: padding + (cell.row + 0.5) * cellSize,
   });
-  const goal = centerOf(maze.goal);
+  const directionOf = (name) => DIRECTIONS.find((direction) => direction.name === name);
+  const extendOutside = (cell, directionName) => {
+    const point = centerOf(cell);
+    const direction = directionOf(directionName);
+    return {
+      x: point.x + direction.dc * cellSize,
+      y: point.y + direction.dr * cellSize,
+    };
+  };
+  const target = centerOf(maze.target);
   const entrance = centerOf(maze.entrance);
-  const solutionPoints = maze.solution
+  const entranceOutside = extendOutside(maze.entrance, maze.entranceDirection);
+  const solutionPoints = [
+    `${entranceOutside.x},${entranceOutside.y}`,
+    ...maze.solution
     .map((cell) => {
       const point = centerOf(cell);
       return `${point.x},${point.y}`;
-    })
-    .join(" ");
+    }),
+    ...(maze.targetDirection
+      ? [extendOutside(maze.target, maze.targetDirection)]
+        .map((point) => `${point.x},${point.y}`)
+      : []),
+  ].join(" ");
+  const targetLabel = maze.goalMode === "center" ? "终点" : "出口";
 
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${width}" role="img" aria-label="${maze.shape} maze">
   <rect width="100%" height="100%" fill="#fffdf8" />
   ${showSolution ? `<polyline points="${solutionPoints}" fill="none" stroke="#ef8354" stroke-width="${cellSize * 0.28}" stroke-linecap="round" stroke-linejoin="round" opacity="0.8" />` : ""}
   <g fill="none" stroke="#172326" stroke-width="${lineWidth}" stroke-linecap="square">${wallLines}</g>
-  <circle cx="${goal.x}" cy="${goal.y}" r="${cellSize * 0.3}" fill="#ef8354" />
+  <circle cx="${target.x}" cy="${target.y}" r="${cellSize * 0.3}" fill="#ef8354" />
   <circle cx="${entrance.x}" cy="${entrance.y}" r="${cellSize * 0.18}" fill="#2a7f78" />
-  <text x="${goal.x}" y="${goal.y - cellSize * 0.52}" text-anchor="middle" font-family="sans-serif" font-size="${cellSize * 0.48}" font-weight="700" fill="#b64d2e">终点</text>
+  <text x="${target.x}" y="${target.y - cellSize * 0.72}" text-anchor="middle" font-family="sans-serif" font-size="${cellSize * 0.48}" font-weight="700" fill="#b64d2e">${targetLabel}</text>
 </svg>`;
 }

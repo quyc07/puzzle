@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="三角形、正方形和圆形迷宫生成器" />
     <title>形状迷宫生成器</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=2" />
   </head>
   <body>
     <main class="app-shell">
@@ -48,7 +48,21 @@
           </fieldset>
 
           <fieldset>
-            <legend>03 · 随机种子</legend>
+            <legend>03 · 选择终点模式</legend>
+            <div class="goal-options">
+              <label>
+                <input type="radio" name="goalMode" value="center" />
+                <span><strong>中心终点</strong><small>从外部入口走到图形中心</small></span>
+              </label>
+              <label>
+                <input type="radio" name="goalMode" value="through" checked />
+                <span><strong>穿过迷宫</strong><small>从底部入口走到顶部出口</small></span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>04 · 随机种子</legend>
             <div class="seed-row">
               <input id="seed" name="seed" type="number" min="0" max="4294967295" aria-label="随机种子" />
               <button id="reuse-seed" type="button" class="secondary">按种子重现</button>
@@ -58,7 +72,7 @@
           <label class="toggle-row">
             <span>
               <strong>显示正确路线</strong>
-              <small>橙色线条从入口通往中心</small>
+              <small>橙色线条显示入口到目标的路线</small>
             </span>
             <input id="show-solution" type="checkbox" role="switch" />
           </label>
@@ -80,12 +94,12 @@
           <div id="maze-preview" class="maze-preview"></div>
           <div class="legend">
             <span><i class="entrance-dot"></i>入口</span>
-            <span><i class="goal-dot"></i>中心终点</span>
+            <span><i class="goal-dot"></i>终点 / 出口</span>
           </div>
         </section>
       </section>
     </main>
 
-    <script type="module" src="./src/app.js"></script>
+    <script type="module" src="./src/app.js?v=2"></script>
   </body>
 </html>

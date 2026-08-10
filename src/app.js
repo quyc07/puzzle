@@ -1,4 +1,4 @@
-import { generateMaze, mazeToSvg, validateMaze } from "./maze.js";
+import { generateMaze, mazeToSvg, validateMaze } from "./maze.js?v=2";
 
 const shapeNames = {
   triangle: "三角形",
@@ -10,6 +10,11 @@ const difficultySizes = {
   easy: 15,
   medium: 23,
   hard: 31,
+};
+
+const goalModeNames = {
+  center: "中心终点",
+  through: "贯穿出口",
 };
 
 const form = document.querySelector("#maze-form");
@@ -33,7 +38,7 @@ function render() {
   const showSolution = solutionInput.checked;
   preview.innerHTML = mazeToSvg(maze, { showSolution });
   const validation = validateMaze(maze);
-  stats.textContent = `${shapeNames[maze.shape]} · ${maze.cells.size} 个单元 · 正确路径 ${validation.solutionLength} 步`;
+  stats.textContent = `${shapeNames[maze.shape]} · ${goalModeNames[maze.goalMode]} · 正确路径 ${validation.solutionLength} 步`;
   downloadButton.disabled = false;
 }
 
@@ -43,6 +48,7 @@ function generate() {
   maze = generateMaze({
     shape: selectedValue("shape"),
     size: difficultySizes[selectedValue("difficulty")],
+    goalMode: selectedValue("goalMode"),
     seed,
   });
   render();
@@ -57,7 +63,7 @@ form.addEventListener("submit", (event) => {
 form.addEventListener("change", (event) => {
   if (event.target === solutionInput) {
     render();
-  } else if (event.target.name === "shape" || event.target.name === "difficulty") {
+  } else if (["shape", "difficulty", "goalMode"].includes(event.target.name)) {
     generate();
   }
 });
