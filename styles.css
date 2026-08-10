@@ -451,6 +451,19 @@ button:disabled {
   max-height: 570px;
 }
 
+.maze-preview.is-playing {
+  touch-action: none;
+  user-select: none;
+}
+
+.touch-hint {
+  display: none;
+  margin: 0 0 12px;
+  color: #657172;
+  font-size: 0.78rem;
+  text-align: center;
+}
+
 .legend {
   display: flex;
   justify-content: center;
@@ -550,6 +563,10 @@ button:disabled {
 
   .play-actions {
     grid-column: 1 / -1;
+  }
+
+  .touch-hint {
+    display: block;
   }
 }
 

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { COLLISION_PENALTY_MS, remainingTime, timeLimitForMaze, visibleCellsForFog } from "../src/game.js";
+import { COLLISION_PENALTY_MS, directionFromSwipe, remainingTime, timeLimitForMaze, visibleCellsForFog } from "../src/game.js";
 import { generateMaze } from "../src/maze.js";
 
 test("time challenge limit scales with maze solution length", () => {
@@ -33,4 +33,14 @@ test("fog reveals nearby cells and preserves previously explored areas", () => {
   assert.ok(initial.size < maze.cells.size);
   assert.ok([...initial].every((key) => explored.has(key)));
   assert.ok(explored.size > initial.size);
+});
+
+test("swipe direction follows the dominant axis and ignores short gestures", () => {
+  const origin = { x: 100, y: 100 };
+
+  assert.equal(directionFromSwipe(origin, { x: 150, y: 110 }), "E");
+  assert.equal(directionFromSwipe(origin, { x: 50, y: 90 }), "W");
+  assert.equal(directionFromSwipe(origin, { x: 110, y: 150 }), "S");
+  assert.equal(directionFromSwipe(origin, { x: 90, y: 50 }), "N");
+  assert.equal(directionFromSwipe(origin, { x: 115, y: 110 }), null);
 });

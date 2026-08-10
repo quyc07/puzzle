@@ -31,3 +31,16 @@ export function visibleCellsForFog(maze, path, radius = 1) {
 
   return visible;
 }
+
+export function directionFromSwipe(start, end, minimumDistance = 24) {
+  const horizontalDistance = end.x - start.x;
+  const verticalDistance = end.y - start.y;
+
+  if (Math.max(Math.abs(horizontalDistance), Math.abs(verticalDistance)) < minimumDistance) {
+    return null;
+  }
+  if (Math.abs(horizontalDistance) > Math.abs(verticalDistance)) {
+    return horizontalDistance > 0 ? "E" : "W";
+  }
+  return verticalDistance > 0 ? "S" : "N";
+}

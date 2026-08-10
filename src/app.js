@@ -1,4 +1,4 @@
-import { COLLISION_PENALTY_MS, remainingTime, timeLimitForMaze, visibleCellsForFog } from "./game.js?v=3";
+import { COLLISION_PENALTY_MS, directionFromSwipe, remainingTime, timeLimitForMaze, visibleCellsForFog } from "./game.js?v=4";
 import { attemptMove, findPath, generateMaze, mazeToSvg, validateMaze } from "./maze.js?v=14";
 
 const shapeNames = {
@@ -49,6 +49,7 @@ const fogLegend = document.querySelector("#fog-legend");
 let maze;
 let timerId;
 let playState;
+let swipeStart;
 
 function randomSeed() {
   return Math.floor(Math.random() * 0xffffffff);
@@ -130,6 +131,7 @@ function updatePlayUI() {
   gameModeInputs.forEach((input) => {
     input.disabled = isActive;
   });
+  preview.classList.toggle("is-playing", isActive);
 }
 
 function stopTimer() {
@@ -141,6 +143,7 @@ function stopTimer() {
 
 function resetPlay() {
   stopTimer();
+  swipeStart = undefined;
   playState = {
     active: false,
     completedAt: null,
@@ -295,6 +298,29 @@ gameModeInputs.forEach((input) => {
 
 directionButtons.forEach((button) => {
   button.addEventListener("click", () => movePlayer(button.dataset.direction));
+});
+
+preview.addEventListener("pointerdown", (event) => {
+  if (!playState.active || event.pointerType === "mouse" || !event.isPrimary) {
+    return;
+  }
+  swipeStart = { x: event.clientX, y: event.clientY, pointerId: event.pointerId };
+});
+
+preview.addEventListener("pointerup", (event) => {
+  if (!swipeStart || swipeStart.pointerId !== event.pointerId) {
+    return;
+  }
+  const direction = directionFromSwipe(swipeStart, { x: event.clientX, y: event.clientY });
+  swipeStart = undefined;
+  if (direction) {
+    event.preventDefault();
+    movePlayer(direction);
+  }
+});
+
+preview.addEventListener("pointercancel", () => {
+  swipeStart = undefined;
 });
 
 window.addEventListener("keydown", (event) => {
