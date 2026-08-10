@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta name="description" content="三角形、正方形和圆形迷宫生成器" />
     <title>形状迷宫生成器</title>
-    <link rel="stylesheet" href="./styles.css?v=2" />
+    <link rel="stylesheet" href="./styles.css?v=3" />
   </head>
   <body>
     <main class="app-shell">
@@ -92,15 +92,35 @@
             </div>
             <p id="maze-stats" aria-live="polite"></p>
           </div>
+          <div class="play-toolbar">
+            <div class="play-state" aria-live="polite">
+              <strong id="play-status">准备闯关</strong>
+              <small id="play-hint">从入口出发，找到橙色目标</small>
+            </div>
+            <div class="play-metrics" aria-label="闯关数据">
+              <span><small>时间</small><strong id="play-time">00:00</strong></span>
+              <span><small>步数</small><strong id="play-moves">0</strong></span>
+              <span><small>撞墙</small><strong id="play-collisions">0</strong></span>
+            </div>
+            <button id="start-play" type="button" class="primary">开始闯关</button>
+          </div>
           <div id="maze-preview" class="maze-preview"></div>
-          <div class="legend">
-            <span><i class="entrance-dot"></i>入口</span>
-            <span><i class="goal-dot"></i>终点 / 出口</span>
+          <div class="preview-footer">
+            <div class="legend">
+              <span><i class="entrance-dot"></i>入口</span>
+              <span><i class="goal-dot"></i>终点 / 出口</span>
+            </div>
+            <div class="direction-pad" aria-label="移动方向">
+              <button type="button" data-direction="N" aria-label="向上移动">↑</button>
+              <button type="button" data-direction="W" aria-label="向左移动">←</button>
+              <button type="button" data-direction="S" aria-label="向下移动">↓</button>
+              <button type="button" data-direction="E" aria-label="向右移动">→</button>
+            </div>
           </div>
         </section>
       </section>
     </main>
 
-    <script type="module" src="./src/app.js?v=7"></script>
+    <script type="module" src="./src/app.js?v=9"></script>
   </body>
 </html>

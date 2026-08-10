@@ -333,6 +333,48 @@ button:disabled {
   text-align: right;
 }
 
+.play-toolbar {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) auto auto;
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+  padding: 14px;
+  border: 1px solid #d7d3ca;
+  background: #f7f3ea;
+}
+
+.play-state {
+  display: grid;
+  gap: 3px;
+}
+
+.play-state small {
+  color: #718080;
+  line-height: 1.35;
+}
+
+.play-metrics {
+  display: flex;
+  gap: 16px;
+}
+
+.play-metrics span {
+  display: grid;
+  min-width: 42px;
+  gap: 2px;
+  text-align: center;
+}
+
+.play-metrics small {
+  color: #718080;
+  font-size: 0.68rem;
+}
+
+.play-metrics strong {
+  font-variant-numeric: tabular-nums;
+}
+
 .maze-preview {
   display: grid;
   min-height: 0;
@@ -353,6 +395,47 @@ button:disabled {
   gap: 24px;
   color: #657172;
   font-size: 0.78rem;
+}
+
+.preview-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.direction-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 40px);
+  grid-template-areas:
+    ". up ."
+    "left down right";
+  gap: 4px;
+}
+
+.direction-pad button {
+  min-height: 40px;
+  padding: 0;
+  border-color: #c9c5bc;
+  background: #fffdf8;
+  color: #172326;
+  font-size: 1.1rem;
+}
+
+.direction-pad [data-direction="N"] {
+  grid-area: up;
+}
+
+.direction-pad [data-direction="W"] {
+  grid-area: left;
+}
+
+.direction-pad [data-direction="S"] {
+  grid-area: down;
+}
+
+.direction-pad [data-direction="E"] {
+  grid-area: right;
 }
 
 .legend span {
@@ -387,6 +470,14 @@ button:disabled {
 
   .preview-panel {
     min-height: 560px;
+  }
+
+  .play-toolbar {
+    grid-template-columns: 1fr auto;
+  }
+
+  .play-toolbar > button {
+    grid-column: 1 / -1;
   }
 }
 
@@ -423,5 +514,22 @@ button:disabled {
   #maze-stats {
     margin-top: 10px;
     text-align: left;
+  }
+
+  .play-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .play-toolbar > button {
+    grid-column: auto;
+  }
+
+  .play-metrics {
+    justify-content: space-between;
+  }
+
+  .preview-footer {
+    align-items: center;
+    flex-direction: column;
   }
 }

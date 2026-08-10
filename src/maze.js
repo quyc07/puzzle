@@ -240,7 +240,24 @@ export function validateMaze(maze) {
   };
 }
 
-export function mazeToSvg(maze, { showSolution = false, cellSize = 24 } = {}) {
+export function attemptMove(maze, current, directionName) {
+  const direction = DIRECTIONS.find((candidate) => candidate.name === directionName);
+  if (!direction) {
+    throw new Error(`Unsupported direction: ${directionName}`);
+  }
+  if (current.walls[direction.name]) {
+    return { cell: current, moved: false };
+  }
+
+  const next = maze.cells.get(keyOf(current.row + direction.dr, current.col + direction.dc));
+  return next ? { cell: next, moved: true } : { cell: current, moved: false };
+}
+
+export function mazeToSvg(maze, {
+  showSolution = false,
+  cellSize = 24,
+  playerPath = [],
+} = {}) {
   const padding = cellSize * 1.6;
   const extent = maze.size * cellSize;
   const width = extent + padding * 2;
@@ -298,6 +315,11 @@ export function mazeToSvg(maze, { showSolution = false, cellSize = 24 } = {}) {
         .map((point) => `${point.x},${point.y}`)
       : []),
   ].join(" ");
+  const playerPoints = playerPath.map((cell) => {
+    const point = centerOf(cell);
+    return `${point.x},${point.y}`;
+  }).join(" ");
+  const player = playerPath.length > 0 ? centerOf(playerPath.at(-1)) : null;
   const targetLabel = maze.goalMode === "center" ? "终点" : "出口";
   const shapeLabels = { triangle: "三角形", square: "正方形", circle: "圆形" };
   const goalModeLabels = { center: "中心终点", through: "贯穿出口" };
@@ -314,10 +336,12 @@ export function mazeToSvg(maze, { showSolution = false, cellSize = 24 } = {}) {
   <metadata id="maze-reproduction">${reproduction}</metadata>
   <rect width="100%" height="100%" fill="#fffdf8" />
   <text x="${width / 2}" y="${padding + extent / 2}" text-anchor="middle" dominant-baseline="middle" transform="rotate(-28 ${width / 2} ${padding + extent / 2})" font-family="sans-serif" font-size="${cellSize * 1.25}" font-weight="700" letter-spacing="0.08em" fill="#657172" opacity="0.22">SEED · ${maze.seed}</text>
-  ${showSolution ? `<polyline points="${solutionPoints}" fill="none" stroke="#ef8354" stroke-width="${cellSize * 0.28}" stroke-linecap="round" stroke-linejoin="round" opacity="0.8" />` : ""}
+  ${showSolution ? `<polyline id="maze-solution" points="${solutionPoints}" fill="none" stroke="#ef8354" stroke-width="${cellSize * 0.28}" stroke-linecap="round" stroke-linejoin="round" opacity="0.8" />` : ""}
+  ${player ? `<polyline id="player-trail" points="${playerPoints}" fill="none" stroke="#2a7f78" stroke-width="${cellSize * 0.24}" stroke-linecap="round" stroke-linejoin="round" opacity="0.68" />` : ""}
   <g fill="none" stroke="#172326" stroke-width="${lineWidth}" stroke-linecap="square">${wallLines}</g>
   <circle cx="${target.x}" cy="${target.y}" r="${cellSize * 0.3}" fill="#ef8354" />
   <circle cx="${entrance.x}" cy="${entrance.y}" r="${cellSize * 0.18}" fill="#2a7f78" />
+  ${player ? `<circle id="maze-player" cx="${player.x}" cy="${player.y}" r="${cellSize * 0.32}" fill="#fffdf8" stroke="#11665f" stroke-width="${cellSize * 0.15}" />` : ""}
   <text x="${target.x}" y="${target.y - cellSize * 0.72}" text-anchor="middle" font-family="sans-serif" font-size="${cellSize * 0.48}" font-weight="700" fill="#b64d2e">${targetLabel}</text>
   <line x1="${padding}" y1="${width + cellSize * 0.12}" x2="${width - padding}" y2="${width + cellSize * 0.12}" stroke="#657172" stroke-width="1" opacity="0.28" />
   <text x="${width / 2}" y="${width + cellSize * 0.72}" text-anchor="middle" font-family="sans-serif" font-size="${cellSize * 0.42}" letter-spacing="0.04em" fill="#657172" opacity="0.78">${watermark}</text>

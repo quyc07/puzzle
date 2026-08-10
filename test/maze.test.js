@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { generateMaze, mazeToSvg, validateMaze } from "../src/maze.js";
+import { attemptMove, generateMaze, mazeToSvg, validateMaze } from "../src/maze.js";
 
 test("all supported shapes and difficulties produce valid mazes", () => {
   for (const shape of ["triangle", "square", "circle"]) {
@@ -43,6 +43,33 @@ test("SVG can include the solution path", () => {
 
   assert.doesNotMatch(mazeToSvg(maze), /<polyline/);
   assert.match(mazeToSvg(maze, { showSolution: true }), /<polyline/);
+});
+
+test("player movement respects passages and walls", () => {
+  const maze = generateMaze({ shape: "square", size: 15, seed: 9 });
+  const [current, next] = maze.solution;
+  const dr = next.row - current.row;
+  const dc = next.col - current.col;
+  const direction = dr === -1 ? "N" : dr === 1 ? "S" : dc === 1 ? "E" : "W";
+  const validMove = attemptMove(maze, current, direction);
+
+  assert.equal(validMove.moved, true);
+  assert.equal(validMove.cell, next);
+
+  const blockedDirection = Object.entries(current.walls).find(([, hasWall]) => hasWall)?.[0];
+  if (blockedDirection) {
+    const blockedMove = attemptMove(maze, current, blockedDirection);
+    assert.equal(blockedMove.moved, false);
+    assert.equal(blockedMove.cell, current);
+  }
+});
+
+test("SVG renders player position and trail", () => {
+  const maze = generateMaze({ shape: "circle", size: 15, seed: 11 });
+  const svg = mazeToSvg(maze, { playerPath: maze.solution.slice(0, 3) });
+
+  assert.match(svg, /id="player-trail"/);
+  assert.match(svg, /id="maze-player"/);
 });
 
 test("SVG labels the selected goal mode", () => {
