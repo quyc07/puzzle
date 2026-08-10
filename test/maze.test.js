@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { attemptMove, generateMaze, mazeToSvg, validateMaze } from "../src/maze.js";
+import { attemptMove, findPath, generateMaze, mazeToSvg, validateMaze } from "../src/maze.js";
 
 test("all supported shapes and difficulties produce valid mazes", () => {
   for (const shape of ["triangle", "square", "circle"]) {
@@ -17,6 +17,8 @@ test("all supported shapes and difficulties produce valid mazes", () => {
           assert.ok(validation.solutionLength > 1);
           assert.equal(maze.solution[0], maze.entrance);
           assert.equal(maze.solution.at(-1), maze.target);
+          assert.equal(maze.center.row, (size - 1) / 2);
+          assert.equal(maze.center.col, (size - 1) / 2);
 
           if (goalMode === "center") {
             assert.equal(maze.target.row, (size - 1) / 2);
@@ -70,6 +72,24 @@ test("SVG renders player position and trail", () => {
 
   assert.match(svg, /id="player-trail"/);
   assert.match(svg, /id="maze-player"/);
+});
+
+test("treasure escape has paths to the center and then the exit", () => {
+  const maze = generateMaze({ shape: "circle", size: 15, seed: 27, goalMode: "through" });
+  const toTreasure = findPath(maze, maze.entrance, maze.center);
+  const toExit = findPath(maze, maze.center, maze.target);
+  const svg = mazeToSvg(maze, {
+    treasureCell: maze.center,
+    targetLocked: true,
+    solutionPath: [...toTreasure, ...toExit.slice(1)],
+  });
+
+  assert.equal(toTreasure[0], maze.entrance);
+  assert.equal(toTreasure.at(-1), maze.center);
+  assert.equal(toExit[0], maze.center);
+  assert.equal(toExit.at(-1), maze.target);
+  assert.match(svg, /id="maze-treasure"/);
+  assert.match(svg, />锁定<\/text>/);
 });
 
 test("SVG labels the selected goal mode", () => {

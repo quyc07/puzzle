@@ -200,7 +200,8 @@ export function generateMaze({
 
   const normalizedSeed = Number(seed) >>> 0;
   const cells = createCells(shape, size);
-  const start = goalMode === "center" ? closestToCenter(cells, size) : cells.values().next().value;
+  const center = closestToCenter(cells, size);
+  const start = goalMode === "center" ? center : cells.values().next().value;
   carveMaze(cells, start, mulberry32(normalizedSeed));
   const endpoints = goalMode === "center"
     ? { ...chooseCenterEntrance(start, cells), target: start, targetDirection: null }
@@ -216,6 +217,7 @@ export function generateMaze({
     seed: normalizedSeed,
     goalMode,
     cells,
+    center,
     ...endpoints,
     solution,
   };
@@ -253,10 +255,18 @@ export function attemptMove(maze, current, directionName) {
   return next ? { cell: next, moved: true } : { cell: current, moved: false };
 }
 
+export function findPath(maze, start, target) {
+  return solve(start, target, maze.cells);
+}
+
 export function mazeToSvg(maze, {
   showSolution = false,
   cellSize = 24,
   playerPath = [],
+  solutionPath = maze.solution,
+  treasureCell = null,
+  treasureCollected = false,
+  targetLocked = false,
 } = {}) {
   const padding = cellSize * 1.6;
   const extent = maze.size * cellSize;
@@ -305,7 +315,7 @@ export function mazeToSvg(maze, {
   const entranceOutside = extendOutside(maze.entrance, maze.entranceDirection);
   const solutionPoints = [
     `${entranceOutside.x},${entranceOutside.y}`,
-    ...maze.solution
+    ...solutionPath
     .map((cell) => {
       const point = centerOf(cell);
       return `${point.x},${point.y}`;
@@ -320,7 +330,9 @@ export function mazeToSvg(maze, {
     return `${point.x},${point.y}`;
   }).join(" ");
   const player = playerPath.length > 0 ? centerOf(playerPath.at(-1)) : null;
-  const targetLabel = maze.goalMode === "center" ? "终点" : "出口";
+  const treasure = treasureCell ? centerOf(treasureCell) : null;
+  const targetLabel = targetLocked ? "锁定" : maze.goalMode === "center" ? "终点" : "出口";
+  const targetColor = targetLocked ? "#9aa2a1" : "#ef8354";
   const shapeLabels = { triangle: "三角形", square: "正方形", circle: "圆形" };
   const goalModeLabels = { center: "中心终点", through: "贯穿出口" };
   const watermark = `随机种子 ${maze.seed} · ${shapeLabels[maze.shape]} · ${maze.size}×${maze.size} · ${goalModeLabels[maze.goalMode]} · V1`;
@@ -339,8 +351,9 @@ export function mazeToSvg(maze, {
   ${showSolution ? `<polyline id="maze-solution" points="${solutionPoints}" fill="none" stroke="#ef8354" stroke-width="${cellSize * 0.28}" stroke-linecap="round" stroke-linejoin="round" opacity="0.8" />` : ""}
   ${player ? `<polyline id="player-trail" points="${playerPoints}" fill="none" stroke="#2a7f78" stroke-width="${cellSize * 0.24}" stroke-linecap="round" stroke-linejoin="round" opacity="0.68" />` : ""}
   <g fill="none" stroke="#172326" stroke-width="${lineWidth}" stroke-linecap="square">${wallLines}</g>
-  <circle cx="${target.x}" cy="${target.y}" r="${cellSize * 0.3}" fill="#ef8354" />
+  <circle cx="${target.x}" cy="${target.y}" r="${cellSize * 0.3}" fill="${targetColor}" />
   <circle cx="${entrance.x}" cy="${entrance.y}" r="${cellSize * 0.18}" fill="#2a7f78" />
+  ${treasure && !treasureCollected ? `<circle id="maze-treasure" cx="${treasure.x}" cy="${treasure.y}" r="${cellSize * 0.38}" fill="#f4c95d" stroke="#9a6b12" stroke-width="${cellSize * 0.1}" /><text x="${treasure.x}" y="${treasure.y + cellSize * 0.18}" text-anchor="middle" font-family="sans-serif" font-size="${cellSize * 0.55}" font-weight="700" fill="#704b09">★</text>` : ""}
   ${player ? `<circle id="maze-player" cx="${player.x}" cy="${player.y}" r="${cellSize * 0.32}" fill="#fffdf8" stroke="#11665f" stroke-width="${cellSize * 0.15}" />` : ""}
   <text x="${target.x}" y="${target.y - cellSize * 0.72}" text-anchor="middle" font-family="sans-serif" font-size="${cellSize * 0.48}" font-weight="700" fill="#b64d2e">${targetLabel}</text>
   <line x1="${padding}" y1="${width + cellSize * 0.12}" x2="${width - padding}" y2="${width + cellSize * 0.12}" stroke="#657172" stroke-width="1" opacity="0.28" />
