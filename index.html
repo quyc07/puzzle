@@ -4,22 +4,22 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta name="description" content="三角形、正方形和圆形迷宫生成器" />
-    <title>形状迷宫生成器</title>
-    <link rel="stylesheet" href="./styles.css?v=10" />
+    <meta name="description" content="三角形、正方形和圆形迷宫，经典、取宝、计时、迷雾四种模式在线闯关" />
+    <title>形状迷宫 · 在线闯关</title>
+    <link rel="stylesheet" href="./styles.css?v=11" />
   </head>
   <body>
     <main class="app-shell">
       <header class="hero">
-        <p class="eyebrow">SHAPE MAZE LAB</p>
-        <h1>把简单形状，变成一座迷宫。</h1>
-        <p>选择轮廓和难度，每次生成一张拥有唯一解的迷宫。</p>
+        <p class="eyebrow">SHAPE MAZE QUEST</p>
+        <h1>同一个迷宫，<br />四种闯关玩法。</h1>
+        <p>三角形、正方形或圆形轮廓下，每张迷宫都只有一条正确路径。选好形状与难度，随时出发。</p>
       </header>
 
       <section class="workspace">
         <form id="maze-form" class="control-panel">
           <fieldset>
-            <legend>01 · 选择轮廓</legend>
+            <legend>01 · 选择迷宫轮廓</legend>
             <div class="shape-options">
               <label class="shape-option">
                 <input type="radio" name="shape" value="triangle" />
@@ -49,11 +49,11 @@
           </fieldset>
 
           <fieldset>
-            <legend>03 · 选择终点模式</legend>
+            <legend>03 · 设置目标</legend>
             <div class="goal-options">
               <label>
                 <input type="radio" name="goalMode" value="center" />
-                <span><strong>中心终点</strong><small>从外部入口走到图形中心</small></span>
+                <span><strong>中心终点</strong><small>从入口走到图形中心</small></span>
               </label>
               <label>
                 <input type="radio" name="goalMode" value="through" checked />
@@ -87,8 +87,8 @@
         <section class="preview-panel" aria-labelledby="preview-title">
           <div class="preview-heading">
             <div>
-              <p class="eyebrow">LIVE PREVIEW</p>
-              <h2 id="preview-title">迷宫预览</h2>
+              <p class="eyebrow">PLAY ARENA</p>
+              <h2 id="preview-title">闯关现场</h2>
             </div>
             <p id="maze-stats" aria-live="polite"></p>
           </div>
@@ -96,19 +96,19 @@
             <div class="game-mode-picker" role="radiogroup" aria-label="选择游戏模式">
               <label>
                 <input type="radio" name="gameMode" value="classic" checked />
-                <span><strong>经典闯关</strong><small>从入口直接找到目标</small></span>
+                <span><strong>经典闯关</strong><small>直达目标，最纯粹的对决</small></span>
               </label>
               <label>
                 <input type="radio" name="gameMode" value="treasure" />
-                <span><strong>取宝逃生</strong><small>先取中心宝物，再逃到出口</small></span>
+                <span><strong>取宝逃生</strong><small>先取中心宝物，再逃出迷宫</small></span>
               </label>
               <label>
                 <input type="radio" name="gameMode" value="timeAttack" />
-                <span><strong>计时挑战</strong><small>倒计时内到达目标，撞墙扣时</small></span>
+                <span><strong>计时挑战</strong><small>倒计时内抵达，撞墙扣 2 秒</small></span>
               </label>
               <label>
                 <input type="radio" name="gameMode" value="fog" />
-                <span><strong>迷雾探索</strong><small>只显示附近和走过的区域</small></span>
+                <span><strong>迷雾探索</strong><small>在迷雾中摸索前进的路</small></span>
               </label>
             </div>
             <div class="play-state" aria-live="polite">
@@ -145,6 +145,6 @@
       </section>
     </main>
 
-    <script type="module" src="./src/app.js?v=17"></script>
+    <script type="module" src="./src/app.js?v=18"></script>
   </body>
 </html>

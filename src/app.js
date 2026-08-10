@@ -89,39 +89,39 @@ function updatePlayUI() {
   const isFogMode = playState?.gameMode === "fog";
 
   if (isAborted) {
-    playStatus.textContent = "游戏已终止";
-    playHint.textContent = `已保留 ${playState.moves} 步记录，可以重新开始或切换模式`;
+    playStatus.textContent = "本次挑战已终止";
+    playHint.textContent = `保留了 ${playState.moves} 步的成绩，可以重新开始或换个模式`;
   } else if (isTimeAttack) {
-    playStatus.textContent = isFailed ? "时间到！" : isCompleted ? "限时通关！" : isActive ? "争分夺秒" : "准备计时挑战";
+    playStatus.textContent = isFailed ? "超时了！" : isCompleted ? "限时通关！" : isActive ? "与时间赛跑" : "准备计时挑战";
     playHint.textContent = isFailed
-      ? `还差一点，再试一次吧`
+      ? `差一点点，再试一次吧`
       : isCompleted ? `剩余 ${formatTime(remainingTime(playState))}，共移动 ${playState.moves} 步`
-        : isActive ? `尽快到达目标，撞墙扣除 ${COLLISION_PENALTY_MS / 1000} 秒` : "在倒计时结束前找到目标";
+        : isActive ? `尽快抵达目标，撞墙会扣 ${COLLISION_PENALTY_MS / 1000} 秒` : "在倒计时结束前抵达目标";
   } else if (isTreasureMode) {
     playStatus.textContent = isCompleted
-      ? "成功带宝物逃出！"
+      ? "夺宝成功，胜利逃出！"
       : playState.treasureCollected ? "宝物已到手" : isActive ? "寻找中心宝物" : "准备取宝逃生";
     playHint.textContent = isCompleted
-      ? `你用了 ${playState.moves} 步完成取宝逃生`
+      ? `你用 ${playState.moves} 步完成了夺宝逃生`
       : playState.treasureCollected
-        ? "出口已经解锁，快离开迷宫"
+        ? "出口已解锁，快带着宝物离开"
         : isActive ? "先到中心取得星星，出口才会解锁" : "先取中心宝物，再从外部出口逃出";
   } else if (isFogMode) {
-    playStatus.textContent = isCompleted ? "探索完成！" : isActive ? "探索迷雾中" : "准备迷雾探索";
+    playStatus.textContent = isCompleted ? "拨开迷雾，顺利通关！" : isActive ? "探索迷雾中" : "准备迷雾探索";
     playHint.textContent = isCompleted
-      ? `你用了 ${playState.moves} 步走出迷雾`
-      : isActive ? "附近区域和走过的道路会保持可见" : "从入口出发，在迷雾中寻找目标";
+      ? `你用 ${playState.moves} 步走出了迷雾`
+      : isActive ? "附近与走过的区域会保持可见" : "从入口出发，在迷雾中寻找目标";
   } else {
-    playStatus.textContent = isCompleted ? "闯关成功！" : isActive ? "闯关中" : "准备闯关";
+    playStatus.textContent = isCompleted ? "漂亮，通关了！" : isActive ? "闯关进行中" : "准备闯关";
     playHint.textContent = isCompleted
-      ? `你用了 ${playState.moves} 步到达目标`
+      ? `你用 ${playState.moves} 步抵达目标`
       : isActive ? "使用方向键、WASD 或下方按钮移动" : "从入口出发，找到橙色目标";
   }
   timeLabel.textContent = isTimeAttack ? "剩余" : "时间";
   timeDisplay.textContent = formatTime(isTimeAttack ? remainingTime(playState) : elapsedTime());
   moveDisplay.textContent = String(playState?.moves ?? 0);
   collisionDisplay.textContent = String(playState?.collisions ?? 0);
-  playButton.textContent = isCompleted || isFailed ? "再玩一次" : isActive ? "重新开始" : "开始闯关";
+  playButton.textContent = isCompleted || isFailed ? "再来一局" : isActive ? "重新开始" : "开始闯关";
   if (isAborted) {
     playButton.textContent = "重新开始";
   }
