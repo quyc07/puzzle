@@ -74,6 +74,22 @@ test("SVG renders player position and trail", () => {
   assert.match(svg, /id="maze-player"/);
 });
 
+test("SVG fog hides unexplored cells but leaves the player visible", () => {
+  const maze = generateMaze({ shape: "square", size: 15, seed: 11 });
+  const visible = new Set([maze.entrance.key]);
+  const svg = mazeToSvg(maze, { playerPath: [maze.entrance], fogVisibleKeys: visible });
+  const revealedSvg = mazeToSvg(maze, { fogVisibleKeys: new Set([maze.target.key]) });
+  const fogCellCount = svg.match(/class="fog-cell"/g)?.length ?? 0;
+
+  assert.match(svg, /id="fog-overlay"/);
+  assert.equal(fogCellCount, maze.cells.size - 1);
+  assert.ok(svg.indexOf('id="fog-overlay"') < svg.indexOf('id="maze-player"'));
+  assert.doesNotMatch(svg, /id="maze-target"/);
+  assert.doesNotMatch(svg, />出口<\/text>/);
+  assert.match(revealedSvg, /id="maze-target"/);
+  assert.match(revealedSvg, />出口<\/text>/);
+});
+
 test("treasure escape has paths to the center and then the exit", () => {
   const maze = generateMaze({ shape: "circle", size: 15, seed: 27, goalMode: "through" });
   const toTreasure = findPath(maze, maze.entrance, maze.center);

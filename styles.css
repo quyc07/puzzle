@@ -357,7 +357,7 @@ button:disabled {
 .game-mode-picker {
   display: grid;
   grid-column: 1 / -1;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 8px;
 }
 
@@ -523,6 +523,11 @@ button:disabled {
 .treasure-dot {
   background: #f4c95d;
   box-shadow: 0 0 0 1px #9a6b12;
+}
+
+.fog-dot {
+  background: #172326;
+  box-shadow: 0 0 0 1px #657172;
 }
 
 @media (max-width: 860px) {

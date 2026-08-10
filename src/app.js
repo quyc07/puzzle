@@ -1,5 +1,5 @@
-import { COLLISION_PENALTY_MS, remainingTime, timeLimitForMaze } from "./game.js?v=2";
-import { attemptMove, findPath, generateMaze, mazeToSvg, validateMaze } from "./maze.js?v=11";
+import { COLLISION_PENALTY_MS, remainingTime, timeLimitForMaze, visibleCellsForFog } from "./game.js?v=3";
+import { attemptMove, findPath, generateMaze, mazeToSvg, validateMaze } from "./maze.js?v=12";
 
 const shapeNames = {
   triangle: "三角形",
@@ -22,6 +22,7 @@ const gameModeNames = {
   classic: "经典闯关",
   treasure: "取宝逃生",
   timeAttack: "计时挑战",
+  fog: "迷雾探索",
 };
 
 const form = document.querySelector("#maze-form");
@@ -43,6 +44,7 @@ const gameModeInputs = [...document.querySelectorAll('input[name="gameMode"]')];
 const centerGoalInput = form.elements.goalMode[0];
 const throughGoalInput = form.elements.goalMode[1];
 const treasureLegend = document.querySelector("#treasure-legend");
+const fogLegend = document.querySelector("#fog-legend");
 
 let maze;
 let timerId;
@@ -82,6 +84,7 @@ function updatePlayUI() {
   const isAborted = Boolean(playState?.abortedAt);
   const isTreasureMode = playState?.gameMode === "treasure";
   const isTimeAttack = playState?.gameMode === "timeAttack";
+  const isFogMode = playState?.gameMode === "fog";
 
   if (isAborted) {
     playStatus.textContent = "游戏已终止";
@@ -101,6 +104,11 @@ function updatePlayUI() {
       : playState.treasureCollected
         ? "出口已经解锁，快离开迷宫"
         : isActive ? "先到中心取得星星，出口才会解锁" : "先取中心宝物，再从外部出口逃出";
+  } else if (isFogMode) {
+    playStatus.textContent = isCompleted ? "探索完成！" : isActive ? "探索迷雾中" : "准备迷雾探索";
+    playHint.textContent = isCompleted
+      ? `你用了 ${playState.moves} 步走出迷雾`
+      : isActive ? "附近区域和走过的道路会保持可见" : "从入口出发，在迷雾中寻找目标";
   } else {
     playStatus.textContent = isCompleted ? "闯关成功！" : isActive ? "闯关中" : "准备闯关";
     playHint.textContent = isCompleted
@@ -152,6 +160,7 @@ function resetPlay() {
 function render() {
   const showSolution = solutionInput.checked;
   const isTreasureMode = playState.gameMode === "treasure";
+  const isFogMode = playState.gameMode === "fog";
   const treasureSolution = isTreasureMode
     ? [
       ...findPath(maze, maze.entrance, maze.center),
@@ -165,11 +174,13 @@ function render() {
     treasureCell: isTreasureMode ? maze.center : null,
     treasureCollected: playState.treasureCollected,
     targetLocked: isTreasureMode && !playState.treasureCollected,
+    fogVisibleKeys: isFogMode ? visibleCellsForFog(maze, playState.path) : null,
   });
   const validation = validateMaze(maze);
   stats.textContent = `${shapeNames[maze.shape]} · ${gameModeNames[playState.gameMode]} · ${goalModeNames[maze.goalMode]} · ${validation.solutionLength} 步`;
   downloadButton.disabled = false;
   treasureLegend.hidden = !isTreasureMode;
+  fogLegend.hidden = !isFogMode;
   updatePlayUI();
 }
 
