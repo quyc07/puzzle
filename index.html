@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="三角形、正方形和圆形迷宫生成器" />
+    <title>形状迷宫生成器</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="hero">
+        <p class="eyebrow">SHAPE MAZE LAB</p>
+        <h1>把简单形状，变成一座迷宫。</h1>
+        <p>选择轮廓和难度，每次生成一张拥有唯一解的迷宫。</p>
+      </header>
+
+      <section class="workspace">
+        <form id="maze-form" class="control-panel">
+          <fieldset>
+            <legend>01 · 选择轮廓</legend>
+            <div class="shape-options">
+              <label class="shape-option">
+                <input type="radio" name="shape" value="triangle" />
+                <span class="shape-icon triangle" aria-hidden="true"></span>
+                <strong>三角形</strong>
+              </label>
+              <label class="shape-option">
+                <input type="radio" name="shape" value="square" />
+                <span class="shape-icon square" aria-hidden="true"></span>
+                <strong>正方形</strong>
+              </label>
+              <label class="shape-option">
+                <input type="radio" name="shape" value="circle" checked />
+                <span class="shape-icon circle" aria-hidden="true"></span>
+                <strong>圆形</strong>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>02 · 选择难度</legend>
+            <div class="segmented-control">
+              <label><input type="radio" name="difficulty" value="easy" /><span>简单</span></label>
+              <label><input type="radio" name="difficulty" value="medium" checked /><span>中等</span></label>
+              <label><input type="radio" name="difficulty" value="hard" /><span>困难</span></label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>03 · 随机种子</legend>
+            <div class="seed-row">
+              <input id="seed" name="seed" type="number" min="0" max="4294967295" aria-label="随机种子" />
+              <button id="reuse-seed" type="button" class="secondary">按种子重现</button>
+            </div>
+          </fieldset>
+
+          <label class="toggle-row">
+            <span>
+              <strong>显示正确路线</strong>
+              <small>橙色线条从入口通往中心</small>
+            </span>
+            <input id="show-solution" type="checkbox" role="switch" />
+          </label>
+
+          <div class="actions">
+            <button type="submit" class="primary">生成新迷宫</button>
+            <button id="download-svg" type="button" class="secondary" disabled>下载 SVG</button>
+          </div>
+        </form>
+
+        <section class="preview-panel" aria-labelledby="preview-title">
+          <div class="preview-heading">
+            <div>
+              <p class="eyebrow">LIVE PREVIEW</p>
+              <h2 id="preview-title">迷宫预览</h2>
+            </div>
+            <p id="maze-stats" aria-live="polite"></p>
+          </div>
+          <div id="maze-preview" class="maze-preview"></div>
+          <div class="legend">
+            <span><i class="entrance-dot"></i>入口</span>
+            <span><i class="goal-dot"></i>中心终点</span>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>
