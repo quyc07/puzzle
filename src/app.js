@@ -139,6 +139,7 @@ function updatePlayUI() {
   });
   preview.classList.toggle("is-playing", isActive);
   previewPanel.classList.toggle("is-playing", isActive);
+  document.body.classList.toggle("is-playing", isActive);
 }
 
 function stopTimer() {
