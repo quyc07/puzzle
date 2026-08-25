@@ -1,4 +1,4 @@
-import { COLLISION_PENALTY_MS, directionFromSwipe, remainingTime, timeLimitForMaze, visibleCellsForFog } from "./game.js?v=4";
+import { COLLISION_PENALTY_MS, directionFromSwipe, remainingTime, timeLimitForMaze, visibleCellsForFog } from "./game.js?v=6";
 import { attemptMove, findPath, generateMaze, mazeToSvg, validateMaze } from "./maze.js?v=14";
 
 const shapeNames = {

@@ -5,8 +5,8 @@ import { COLLISION_PENALTY_MS, directionFromSwipe, remainingTime, timeLimitForMa
 import { generateMaze } from "../src/maze.js";
 
 test("time challenge limit scales with maze solution length", () => {
-  assert.equal(timeLimitForMaze({ solution: new Array(10) }), 45000);
-  assert.equal(timeLimitForMaze({ solution: new Array(100) }), 90000);
+  assert.equal(timeLimitForMaze({ solution: new Array(10) }), 120000);
+  assert.equal(timeLimitForMaze({ solution: new Array(100) }), 220000);
 });
 
 test("remaining time includes elapsed time and collision penalties", () => {

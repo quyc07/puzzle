@@ -1,7 +1,7 @@
 export const COLLISION_PENALTY_MS = 2000;
 
 export function timeLimitForMaze(maze) {
-  return Math.max(45000, maze.solution.length * 900);
+  return Math.max(120000, maze.solution.length * 2200);
 }
 
 export function remainingTime(playState, now = Date.now()) {
