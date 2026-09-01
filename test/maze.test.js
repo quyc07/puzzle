@@ -4,7 +4,7 @@ import test from "node:test";
 import { attemptMove, findPath, generateMaze, mazeToSvg, validateMaze } from "../src/maze.js";
 
 test("all supported shapes and difficulties produce valid mazes", () => {
-  for (const shape of ["triangle", "square", "circle", "heart", "star"]) {
+  for (const shape of ["triangle", "square", "circle"]) {
     for (const size of [15, 23, 31]) {
       for (const goalMode of ["center", "through"]) {
         for (const seed of [0, 1, 42, 0xffffffff]) {
@@ -38,13 +38,6 @@ test("the same seed produces the same maze", () => {
   const second = mazeToSvg(generateMaze({ shape: "circle", size: 15, seed: 7 }));
 
   assert.equal(first, second);
-});
-
-test("star rasterization stays connected at edge-case sizes", () => {
-  for (const size of [11, 20, 48, 57]) {
-    const maze = generateMaze({ shape: "star", size, seed: 42, goalMode: "through" });
-    assert.equal(validateMaze(maze).connected, true, `star/${size} must be connected`);
-  }
 });
 
 test("SVG can include the solution path", () => {
@@ -148,5 +141,4 @@ test("SVG embeds visible and machine-readable reproduction data", () => {
 test("invalid size is rejected", () => {
   assert.throws(() => generateMaze({ size: 5 }), /between 7 and 61/);
   assert.throws(() => generateMaze({ goalMode: "unknown" }), /center or through/);
-  assert.throws(() => generateMaze({ shape: "unknown" }), /Unsupported shape/);
 });

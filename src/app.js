@@ -1,12 +1,10 @@
 import { COLLISION_PENALTY_MS, directionFromSwipe, remainingTime, timeLimitForMaze, visibleCellsForFog } from "./game.js?v=6";
-import { attemptMove, findPath, generateMaze, mazeToSvg, validateMaze } from "./maze.js?v=15";
+import { attemptMove, findPath, generateMaze, mazeToSvg, validateMaze } from "./maze.js?v=14";
 
 const shapeNames = {
   triangle: "三角形",
   square: "正方形",
   circle: "圆形",
-  heart: "爱心",
-  star: "五角星",
 };
 
 const difficultySizes = {
