@@ -5,6 +5,12 @@ const DIRECTIONS = [
   { name: "W", dr: 0, dc: -1, opposite: "E" },
 ];
 
+const STAR_VERTICES = Array.from({ length: 10 }, (_, index) => {
+  const angle = -Math.PI / 2 + index * Math.PI / 5;
+  const radius = index % 2 === 0 ? 0.96 : 0.5;
+  return [Math.cos(angle) * radius, Math.sin(angle) * radius];
+});
+
 const keyOf = (row, col) => `${row},${col}`;
 
 function mulberry32(seed) {
@@ -16,6 +22,23 @@ function mulberry32(seed) {
     value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
     return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
   };
+}
+
+function isInsidePolygon(x, y, vertices) {
+  let inside = false;
+
+  for (let index = 0, previous = vertices.length - 1; index < vertices.length; previous = index, index += 1) {
+    const [x1, y1] = vertices[index];
+    const [x2, y2] = vertices[previous];
+    const crossesEdge = (y1 > y) !== (y2 > y)
+      && x < ((x2 - x1) * (y - y1)) / (y2 - y1) + x1;
+
+    if (crossesEdge) {
+      inside = !inside;
+    }
+  }
+
+  return inside;
 }
 
 function isInsideShape(shape, row, col, size) {
@@ -36,6 +59,17 @@ function isInsideShape(shape, row, col, size) {
     return Math.abs(col - center) <= progress * size / 2;
   }
 
+  if (shape === "heart") {
+    const heartX = x / 0.78;
+    const heartY = (-y + 0.08) / 0.88;
+    const base = heartX * heartX + heartY * heartY - 1;
+    return base ** 3 - heartX * heartX * heartY ** 3 <= 0;
+  }
+
+  if (shape === "star") {
+    return isInsidePolygon(x, y, STAR_VERTICES);
+  }
+
   throw new Error(`Unsupported shape: ${shape}`);
 }
 
@@ -54,6 +88,27 @@ function createCells(shape, size) {
       }
     }
   }
+
+  const centerIndex = Math.floor((size - 1) / 2);
+  const centerCell = cells.get(keyOf(centerIndex, centerIndex)) ?? cells.values().next().value;
+  const connectedKeys = new Set([centerCell.key]);
+  const queue = [centerCell];
+
+  for (let index = 0; index < queue.length; index += 1) {
+    for (const { cell } of neighborsOf(queue[index], cells)) {
+      if (!connectedKeys.has(cell.key)) {
+        connectedKeys.add(cell.key);
+        queue.push(cell);
+      }
+    }
+  }
+
+  for (const key of cells.keys()) {
+    if (!connectedKeys.has(key)) {
+      cells.delete(key);
+    }
+  }
+
   return cells;
 }
 
@@ -335,7 +390,13 @@ export function mazeToSvg(maze, {
   const targetIsVisible = !fogVisibleKeys || fogVisibleKeys.has(maze.target.key);
   const targetLabel = targetLocked ? "锁定" : maze.goalMode === "center" ? "终点" : "出口";
   const targetColor = targetLocked ? "#9aa2a1" : "#ef8354";
-  const shapeLabels = { triangle: "三角形", square: "正方形", circle: "圆形" };
+  const shapeLabels = {
+    triangle: "三角形",
+    square: "正方形",
+    circle: "圆形",
+    heart: "爱心",
+    star: "五角星",
+  };
   const goalModeLabels = { center: "中心终点", through: "贯穿出口" };
   const watermark = `随机种子 ${maze.seed} · ${shapeLabels[maze.shape]} · ${maze.size}×${maze.size} · ${goalModeLabels[maze.goalMode]} · V1`;
   const reproduction = JSON.stringify({

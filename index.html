@@ -4,16 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta name="description" content="三角形、正方形和圆形迷宫，经典、取宝、计时、迷雾四种模式在线闯关" />
+    <meta name="description" content="三角形、正方形、圆形、爱心和五角星迷宫，经典、取宝、计时、迷雾四种模式在线闯关" />
     <title>形状迷宫 · 在线闯关</title>
-    <link rel="stylesheet" href="./styles.css?v=14" />
+    <link rel="stylesheet" href="./styles.css?v=15" />
   </head>
   <body>
     <main class="app-shell">
       <header class="hero">
         <p class="eyebrow">SHAPE MAZE QUEST</p>
         <h1>同一个迷宫，<br />四种闯关玩法。</h1>
-        <p>三角形、正方形或圆形轮廓下，每张迷宫都只有一条正确路径。选好形状与难度，随时出发。</p>
+        <p>五种几何轮廓下，每张迷宫都只有一条正确路径。选好形状与难度，随时出发。</p>
       </header>
 
       <section class="workspace">
@@ -35,6 +35,16 @@
                 <input type="radio" name="shape" value="circle" checked />
                 <span class="shape-icon circle" aria-hidden="true"></span>
                 <strong>圆形</strong>
+              </label>
+              <label class="shape-option">
+                <input type="radio" name="shape" value="heart" />
+                <span class="shape-icon heart" aria-hidden="true"></span>
+                <strong>爱心</strong>
+              </label>
+              <label class="shape-option">
+                <input type="radio" name="shape" value="star" />
+                <span class="shape-icon star" aria-hidden="true"></span>
+                <strong>五角星</strong>
               </label>
             </div>
           </fieldset>
@@ -152,6 +162,6 @@
       <span class="celebrate-emoji">🎉</span>
     </div>
 
-    <script type="module" src="./src/app.js?v=23"></script>
+    <script type="module" src="./src/app.js?v=24"></script>
   </body>
 </html>

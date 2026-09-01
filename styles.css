@@ -158,6 +158,20 @@ legend {
   background: transparent;
 }
 
+.shape-icon.heart {
+  clip-path: polygon(
+    50% 100%, 8% 62%, 1% 43%, 4% 25%, 15% 10%, 31% 5%, 43% 11%, 50% 24%,
+    57% 11%, 69% 5%, 85% 10%, 96% 25%, 99% 43%, 92% 62%
+  );
+}
+
+.shape-icon.star {
+  clip-path: polygon(
+    50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 95%,
+    50% 72%, 21% 95%, 32% 57%, 2% 35%, 39% 35%
+  );
+}
+
 .segmented-control {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -599,7 +613,7 @@ button:disabled {
   }
 
   .shape-options {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .shape-option {
